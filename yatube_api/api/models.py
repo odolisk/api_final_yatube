@@ -1,7 +1,8 @@
+from slugify import slugify
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import F, Q
-from slugify import slugify
 
 User = get_user_model()
 
@@ -9,7 +10,10 @@ User = get_user_model()
 class Group(models.Model):
     title = models.CharField(verbose_name='Наименование', max_length=200,
                              help_text='Введите название группы')
-    slug = models.SlugField(verbose_name='Идентификатор URL', unique=True,
+    slug = models.SlugField(verbose_name='Идентификатор URL',
+                            unique=True,
+                            blank=True,
+                            null=True,
                             help_text='Укажите идентификатор URL')
     description = models.TextField(
         verbose_name='Описание',
@@ -36,7 +40,7 @@ class Post(models.Model):
         help_text='Введите текст'
     )
     pub_date = models.DateTimeField(
-        "Дата публикации",
+        'Дата публикации',
         auto_now_add=True
     )
     author = models.ForeignKey(
@@ -53,13 +57,19 @@ class Post(models.Model):
         null=True,
         help_text='Выберите группу для записи')
 
+    @property
+    def short_text(self):
+        return self.text[:25]
+
+    short_text.fget.short_description = 'Краткий текст'
+
     class Meta:
         ordering = ('-pub_date',)
         verbose_name = 'Запись'
         verbose_name_plural = 'Записи'
 
     def __str__(self):
-        return self.text
+        return self.short_text
 
 
 class Comment(models.Model):
@@ -84,14 +94,14 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='follows_i_read',
-        verbose_name='Мои подписки',
-        help_text='Мои подписки')
+        verbose_name='Кто подписан',
+        help_text='Кто подписан')
     following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='follows_i_author',
-        verbose_name='Мои подписчики',
-        help_text='Мои подписчики')
+        verbose_name='На кого подписан',
+        help_text='На кого подписан')
 
     class Meta:
         verbose_name = 'Подписка'
@@ -106,4 +116,4 @@ class Follow(models.Model):
         )
 
     def __str__(self):
-        return f'{self.user.username} to {self.folowing.username}'
+        return f'{self.user.username} to {self.following.username}'

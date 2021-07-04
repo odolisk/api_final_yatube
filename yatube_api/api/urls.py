@@ -1,7 +1,7 @@
-from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
+from django.urls import include, path
 
 from api.views import CommentViewSet, FollowViewSet, GroupViewSet, PostViewSet
 
@@ -16,7 +16,6 @@ v1_router.register(
 )
 v1_router.register('follow', FollowViewSet, basename='follow')
 v1_router.register('group', GroupViewSet, basename='group')
-
 
 urlpatterns = [
     path(f'{API_VERSION}/token/',

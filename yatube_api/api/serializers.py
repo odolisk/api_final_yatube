@@ -5,15 +5,21 @@ from .models import Comment, Follow, Group, Post, User
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+        read_only=True)
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date')
+        fields = ('id', 'text', 'author', 'group', 'pub_date')
         model = Post
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username')
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+        read_only=True)
 
     class Meta:
         fields = ('id', 'author', 'post', 'text', 'created')
@@ -26,7 +32,6 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'title', 'slug', 'description')
         model = Group
-        read_only_fields = ('slug',)
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -50,8 +55,8 @@ class FollowSerializer(serializers.ModelSerializer):
             ),
         ]
 
-    def validate(self, data):
-        if self.context['request'].user == data['following']:
+    def validate_following(self, data):
+        if self.context['request'].user == data:
             raise serializers.ValidationError(
                 'Вы не можете подписаться на самого себя!')
         return data
