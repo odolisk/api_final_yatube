@@ -13,11 +13,9 @@ class Group(models.Model):
     slug = models.SlugField(verbose_name='Идентификатор URL',
                             unique=True,
                             blank=True,
-                            null=True,
                             help_text='Укажите идентификатор URL')
     description = models.TextField(
         verbose_name='Описание',
-        null=True,
         blank=True,
         help_text='Введите описание группы')
 
@@ -57,29 +55,29 @@ class Post(models.Model):
         null=True,
         help_text='Выберите группу для записи')
 
-    @property
-    def short_text(self):
-        return self.text[:25]
-
-    short_text.fget.short_description = 'Краткий текст'
-
     class Meta:
         ordering = ('-pub_date',)
         verbose_name = 'Запись'
         verbose_name_plural = 'Записи'
 
     def __str__(self):
-        return self.short_text
+        return self.text[:25]
 
 
 class Comment(models.Model):
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор'
     )
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name='comments'
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Запись'
     )
-    text = models.TextField()
+    text = models.TextField(verbose_name='Текст комментария')
     created = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
